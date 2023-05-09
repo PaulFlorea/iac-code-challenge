@@ -45,7 +45,7 @@ resource "kubernetes_namespace" "nginx" {
 
 # 2 Replicasets
 # * 0.5vcpu & 512Mi Limit
-resource "kubernetes_replication_controller" "nginx" {
+resource "kubernetes_deployment" "nginx" {
   metadata {
     name = local.nginx_name
     namespace = kubernetes_namespace.nginx.metadata[0].name
@@ -55,8 +55,11 @@ resource "kubernetes_replication_controller" "nginx" {
   }
 
   spec {
-    selector = {
-      test = "test_nginx"
+    replicas = 2
+    selector {
+      match_labels = {
+        test = "test_nginx"
+      }
     }
     template {
       metadata {
@@ -73,6 +76,11 @@ resource "kubernetes_replication_controller" "nginx" {
           image = "${docker_image.nginx.build.*.auth_config[0][0].host_name}${docker_image.nginx.build.*.tag[0][0]}"
           name  = docker_image.nginx.name
           image_pull_policy = "IfNotPresent"
+
+          volume_mount {
+            mount_path = "/var/log/nginx/"
+            name = kubernetes_persistent_volume_claim.nginx.metadata[0].name
+          }
 
           liveness_probe {
             http_get {
@@ -100,6 +108,12 @@ resource "kubernetes_replication_controller" "nginx" {
             }
           }
         }
+        volume {
+          name = kubernetes_persistent_volume_claim.nginx.metadata[0].name
+          persistent_volume_claim {
+            claim_name = kubernetes_persistent_volume_claim.nginx.metadata[0].name
+          }
+        }
       }
     }
   }
@@ -113,7 +127,7 @@ resource "kubernetes_service" "nginx" {
   }
   spec {
     selector = {
-      app = kubernetes_replication_controller.nginx.metadata[0].name
+      app = kubernetes_deployment.nginx.metadata[0].name
     }
     session_affinity = "ClientIP"
     port {
@@ -128,7 +142,46 @@ resource "kubernetes_service" "nginx" {
 # * 1 Persistent Volume
 #   * 2Gi capacity
 #   * local file path (e.g., `${PWD}/pvc`)
-
+resource "kubernetes_persistent_volume_claim" "nginx" {
+  metadata {
+    name = "${local.nginx_name}-pvc"
+    namespace = kubernetes_namespace.nginx.metadata[0].name
+    labels = {
+      type = "host_path"
+    }
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    storage_class_name = "manual"
+    resources {
+      requests = {
+        storage = "2Gi"
+      }
+    }
+    volume_name = kubernetes_persistent_volume.nginx.metadata[0].name
+  }
+}
+resource "kubernetes_persistent_volume" "nginx" {
+  metadata {
+    name = "${local.nginx_name}-pv"
+    # namespace = kubernetes_namespace.nginx.metadata[0].name
+    labels = {
+      type = "host_path"
+    }
+  }
+  spec {
+    capacity = {
+      storage = "2Gi"
+    }
+    access_modes = ["ReadWriteOnce"]
+    storage_class_name = "manual"
+    persistent_volume_source {
+      host_path {
+        path = "${path.cwd}/pvc"
+      }
+    }
+  }
+}
 
 # * Set nginx logs to write to the above PVC
 
