@@ -1,4 +1,4 @@
-variable "deploy_target" {
+variable "target" {
     type        = object({
         kind = string
 
@@ -15,11 +15,11 @@ variable "deploy_target" {
     description = "The target Kubernetes cluster context and auth"
 
     validation {
-        condition     = var.deploy_target.kind == "local" || var.deploy_target.kind == "gke"
+        condition     = var.target.kind == "local" || var.target.kind == "gke"
         error_message = "The target kind must be either 'local' or 'gke'"
     }
     validation {
-        condition     = var.deploy_target.kind == "local" || var.deploy_target.gke_config != null
+        condition     = var.target.kind == "local" || var.target.gke_config != null
         error_message = "gke_config must be provided if kind is gke"
     }
 }
