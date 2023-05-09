@@ -50,6 +50,7 @@ resource "kubernetes_deployment" "nginx" {
     name = local.nginx_name
     namespace = kubernetes_namespace.nginx.metadata[0].name
     labels = {
+      app = "nginx"
       app_sha = local.nginx_sha
     }
   }
@@ -58,16 +59,13 @@ resource "kubernetes_deployment" "nginx" {
     replicas = 2
     selector {
       match_labels = {
-        test = "test_nginx"
+        app = "nginx"
       }
     }
     template {
       metadata {
         labels = {
-          test = "test_nginx"
-        }
-        annotations = {
-          "app_sha" = local.nginx_sha
+          app = "nginx"
         }
       }
 
@@ -129,7 +127,7 @@ resource "kubernetes_service" "nginx" {
     selector = {
       app = kubernetes_deployment.nginx.metadata[0].name
     }
-    session_affinity = "ClientIP"
+    # session_affinity = "ClientIP"
     port {
       port        = 8080
       target_port = 80
