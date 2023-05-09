@@ -1,11 +1,12 @@
 locals {
+  nginx_name = "nginx"
   nginx_sha = sha1(join("", [for f in fileset(path.module, "nginx/*") : filesha1(f)]))
 }
 
 # Build NGINX
 # Create a docker image resource
 resource "docker_image" "nginx" {
-  name = "nginx"
+  name = local.nginx_name
   triggers = {
     dir_sha1 = local.nginx_sha
   }
@@ -46,7 +47,7 @@ resource "kubernetes_namespace" "nginx" {
 # * 0.5vcpu & 512Mi Limit
 resource "kubernetes_replication_controller" "nginx" {
   metadata {
-    name = "nginx"
+    name = local.nginx_name
     namespace = kubernetes_namespace.nginx.metadata[0].name
     labels = {
       app_sha = local.nginx_sha
@@ -105,7 +106,24 @@ resource "kubernetes_replication_controller" "nginx" {
 }
 
 # * ClusterIP + Port 8080
+resource "kubernetes_service" "nginx" {
+  metadata {
+    name = local.nginx_name
+    namespace = kubernetes_namespace.nginx.metadata[0].name
+  }
+  spec {
+    selector = {
+      app = kubernetes_replication_controller.nginx.metadata[0].name
+    }
+    session_affinity = "ClientIP"
+    port {
+      port        = 8080
+      target_port = 80
+    }
 
+    type = "ClusterIP"
+  }
+}
 
 # * 1 Persistent Volume
 #   * 2Gi capacity
