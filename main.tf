@@ -1,6 +1,6 @@
 locals {
   nginx_name = "nginx"
-  nginx_sha = sha1(join("", [for f in fileset(path.module, "nginx/*") : filesha1(f)]))
+  nginx_sha  = sha1(join("", [for f in fileset(path.module, "nginx/*") : filesha1(f)]))
 }
 
 # Build NGINX
@@ -16,7 +16,7 @@ resource "docker_image" "nginx" {
     label = {
       author : "PaulFlorea"
     }
-    
+
     auth_config {
       host_name = var.target.kind == "gke" ? "https://${var.target.gke_config.location}-docker.pkg.dev/${var.target.gke_config.project}/${var.target.docker_registry}" : ""
     }
@@ -25,7 +25,7 @@ resource "docker_image" "nginx" {
 
 resource "docker_registry_image" "nginx" {
   count = var.target.kind == "gke" ? 1 : 0
-  name          = docker_image.nginx.name
+  name  = docker_image.nginx.name
 }
 
 # Namespace
@@ -47,10 +47,10 @@ resource "kubernetes_namespace" "nginx" {
 # * 0.5vcpu & 512Mi Limit
 resource "kubernetes_deployment" "nginx" {
   metadata {
-    name = local.nginx_name
+    name      = local.nginx_name
     namespace = kubernetes_namespace.nginx.metadata[0].name
     labels = {
-      app = "nginx"
+      app     = "nginx"
       app_sha = local.nginx_sha
     }
   }
@@ -71,13 +71,13 @@ resource "kubernetes_deployment" "nginx" {
 
       spec {
         container {
-          image = "${docker_image.nginx.build.*.auth_config[0][0].host_name}${docker_image.nginx.build.*.tag[0][0]}"
-          name  = docker_image.nginx.name
+          image             = "${docker_image.nginx.build.*.auth_config[0][0].host_name}${docker_image.nginx.build.*.tag[0][0]}"
+          name              = docker_image.nginx.name
           image_pull_policy = "IfNotPresent"
 
           volume_mount {
             mount_path = "/var/log/nginx/"
-            name = kubernetes_persistent_volume_claim.nginx.metadata[0].name
+            name       = kubernetes_persistent_volume_claim.nginx.metadata[0].name
           }
 
           liveness_probe {
@@ -120,7 +120,7 @@ resource "kubernetes_deployment" "nginx" {
 # * ClusterIP + Port 8080
 resource "kubernetes_service" "nginx" {
   metadata {
-    name = local.nginx_name
+    name      = local.nginx_name
     namespace = kubernetes_namespace.nginx.metadata[0].name
   }
   spec {
@@ -142,14 +142,14 @@ resource "kubernetes_service" "nginx" {
 #   * local file path (e.g., `${PWD}/pvc`)
 resource "kubernetes_persistent_volume_claim" "nginx" {
   metadata {
-    name = "${local.nginx_name}-pvc"
+    name      = "${local.nginx_name}-pvc"
     namespace = kubernetes_namespace.nginx.metadata[0].name
     labels = {
       type = "host_path"
     }
   }
   spec {
-    access_modes = ["ReadWriteOnce"]
+    access_modes       = ["ReadWriteOnce"]
     storage_class_name = "manual"
     resources {
       requests = {
@@ -171,7 +171,7 @@ resource "kubernetes_persistent_volume" "nginx" {
     capacity = {
       storage = "2Gi"
     }
-    access_modes = ["ReadWriteOnce"]
+    access_modes       = ["ReadWriteOnce"]
     storage_class_name = "manual"
     persistent_volume_source {
       host_path {

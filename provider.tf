@@ -9,7 +9,7 @@ terraform {
     }
 
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
       version = "2.20.0"
     }
   }
@@ -20,7 +20,7 @@ provider "docker" {}
 
 provider "kubernetes" {
   # alias       = "local"
-  config_path = "~/.kube/config"
+  config_path    = "~/.kube/config"
   config_context = "docker-desktop" #TODO: Replace with var later
 }
 
