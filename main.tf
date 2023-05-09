@@ -1,7 +1,14 @@
+locals {
+  nginx_sha = sha1(join("", [for f in fileset(path.module, "nginx/*") : filesha1(f)]))
+}
+
 # Build NGINX
 # Create a docker image resource
 resource "docker_image" "nginx" {
   name = "nginx"
+  triggers = {
+    dir_sha1 = local.nginx_sha
+  }
   build {
     context = "./nginx"
     tag     = ["local-nginx:latest"]
@@ -42,21 +49,21 @@ resource "kubernetes_replication_controller" "nginx" {
     name = "nginx"
     namespace = kubernetes_namespace.nginx.metadata[0].name
     labels = {
-      test = "MyExampleApp"
+      app_sha = local.nginx_sha
     }
   }
 
   spec {
     selector = {
-      test = "MyExampleApp"
+      test = "test_nginx"
     }
     template {
       metadata {
         labels = {
-          test = "MyExampleApp"
+          test = "test_nginx"
         }
         annotations = {
-          "key1" = "value1"
+          "app_sha" = local.nginx_sha
         }
       }
 
