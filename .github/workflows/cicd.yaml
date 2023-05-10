@@ -30,7 +30,7 @@ jobs:
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v1'
         with:
-          workload_identity_provider: ${{ WORKLOAD_ID_PROVIDER }}
+          workload_identity_provider: ${{ vars.WORKLOAD_ID_PROVIDER }}
           service_account: ${{ vars.GKE_TF_SERVICE_ACCOUNT }}
 
       - name: 'Set TF Workspace'
