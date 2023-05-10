@@ -13,14 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      # TODO: configure
-      # - id: 'auth'
-      #   name: 'Authenticate to Google Cloud'
-      #   uses: 'google-github-actions/auth@v1'
-      #   with:
-      #     workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-      #     service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
-
       # TODO: Cleanup
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v1
@@ -49,3 +41,11 @@ jobs:
 
       - name: Check Formatting
         run: terraform fmt -list=true -check -recursive -diff && echo "Terraform formatting is valid."
+
+      # TODO: configure
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          workload_identity_provider: 'projects/628519435158/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          service_account: 'terraform-provisioner@coherent-flame-385415.iam.gserviceaccount.com'
