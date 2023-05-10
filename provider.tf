@@ -24,10 +24,3 @@ terraform {
 }
 
 provider "docker" {}
-
-
-provider "kubernetes" {
-  config_path    = "~/.kube/config"
-  config_context = "docker-desktop" #TODO: Replace with var later
-}
-

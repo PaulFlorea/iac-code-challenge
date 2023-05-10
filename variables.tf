@@ -6,9 +6,10 @@ variable "target" {
 
     # GKE connection information
     gke_config = optional(object({
-      project  = string
-      name     = string
-      location = string
+      project      = string
+      location     = string
+      cluster_name = string
+      zone         = string
     }))
 
   })
