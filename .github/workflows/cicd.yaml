@@ -34,11 +34,11 @@ jobs:
           service_account: ${{ vars.GKE_TF_SERVICE_ACCOUNT }}
 
       - name: 'Set TF Workspace'
-        run:  terraform init
+        run:  terraform init;
               terraform workspace select ${{ vars.TF_WORKSPACE }} || terraform workspace new ${{ vars.TF_WORKSPACE }}
 
       - name: 'TF Plan'
-        run:  echo '${{ vars.TF_VARS }}' > deploy.tfvars
+        run:  echo '${{ vars.TF_VARS }}' > deploy.tfvars;
               terraform plan -var-file deploy.tfvars
 
       - name: 'TF Apply'
