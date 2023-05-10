@@ -3,8 +3,8 @@ terraform {
 
   # COMMENT THIS OUT IF YOU WANT TO TEST LOCALLY ################
   backend "gcs" {
-    bucket  = "iac-demo"
-    prefix  = "terraform/state"
+    bucket = "iac-demo"
+    prefix = "terraform/state"
   }
   ###############################################################
 
