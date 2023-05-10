@@ -30,9 +30,16 @@ jobs:
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v1'
         with:
-          workload_identity_provider: 'projects/628519435158/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-          service_account: 'terraform-provisioner@coherent-flame-385415.iam.gserviceaccount.com'
+          workload_identity_provider: ${{ WORKLOAD_ID_PROVIDER }}
+          service_account: ${{ vars.GKE_TF_SERVICE_ACCOUNT }}
 
       - name: 'Set TF Workspace'
-        run:  terraform init;
+        run:  terraform init
               terraform workspace select ${{ vars.TF_WORKSPACE }} || terraform workspace new ${{ vars.TF_WORKSPACE }}
+
+      - name: 'TF Plan'
+        run:  echo '${{ vars.TF_VARS }}' > deploy.tfvars
+              terraform plan -var-file deploy.tfvars
+
+      - name: 'TF Apply'
+        run:  terraform apply -auto-approve -var-file deploy.tfvars
