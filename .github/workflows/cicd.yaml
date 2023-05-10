@@ -34,4 +34,5 @@ jobs:
           service_account: 'terraform-provisioner@coherent-flame-385415.iam.gserviceaccount.com'
 
       - name: 'Set TF Workspace'
-        run: terraform workspace select ${{ vars.TF_WORKSPACE }} || terraform workspace new ${{ vars.TF_WORKSPACE }}
+        run:  terraform init;
+              terraform workspace select ${{ vars.TF_WORKSPACE }} || terraform workspace new ${{ vars.TF_WORKSPACE }}
