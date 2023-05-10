@@ -31,15 +31,8 @@ resource "docker_registry_image" "nginx" {
 # Namespace
 resource "kubernetes_namespace" "nginx" {
   metadata {
-    # annotations = {
-    #   name = "example-annotation"
-    # }
 
-    # labels = {
-    #   mylabel = "label-value"
-    # }
-
-    name = "nginx"
+    name = local.nginx_name
   }
 }
 
@@ -50,7 +43,7 @@ resource "kubernetes_deployment" "nginx" {
     name      = local.nginx_name
     namespace = kubernetes_namespace.nginx.metadata[0].name
     labels = {
-      app     = "nginx"
+      app     = local.nginx_name
       app_sha = local.nginx_sha
     }
   }
@@ -59,13 +52,13 @@ resource "kubernetes_deployment" "nginx" {
     replicas = 2
     selector {
       match_labels = {
-        app = "nginx"
+        app = local.nginx_name
       }
     }
     template {
       metadata {
         labels = {
-          app = "nginx"
+          app = local.nginx_name
         }
       }
 
@@ -84,11 +77,6 @@ resource "kubernetes_deployment" "nginx" {
             http_get {
               path = "/"
               port = 80
-
-              http_header {
-                name  = "X-Custom-Header"
-                value = "Awesome"
-              }
             }
 
             initial_delay_seconds = 3
@@ -127,7 +115,6 @@ resource "kubernetes_service" "nginx" {
     selector = {
       app = kubernetes_deployment.nginx.metadata[0].name
     }
-    # session_affinity = "ClientIP"
     port {
       port        = 8080
       target_port = 80
@@ -162,7 +149,6 @@ resource "kubernetes_persistent_volume_claim" "nginx" {
 resource "kubernetes_persistent_volume" "nginx" {
   metadata {
     name = "${local.nginx_name}-pv"
-    # namespace = kubernetes_namespace.nginx.metadata[0].name
     labels = {
       type = "host_path"
     }
@@ -180,6 +166,3 @@ resource "kubernetes_persistent_volume" "nginx" {
     }
   }
 }
-
-# * Set nginx logs to write to the above PVC
-

@@ -19,7 +19,6 @@ provider "docker" {}
 
 
 provider "kubernetes" {
-  # alias       = "local"
   config_path    = "~/.kube/config"
   config_context = "docker-desktop" #TODO: Replace with var later
 }
