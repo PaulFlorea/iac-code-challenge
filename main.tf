@@ -24,11 +24,11 @@ resource "docker_image" "nginx" {
   }
 }
 
-resource "docker_registry_image" "nginx" {
-  count         = var.target.kind == "gke" ? 1 : 0
-  name          = docker_image.nginx.name
-  keep_remotely = true
-}
+# resource "docker_registry_image" "nginx" {
+#   count         = var.target.kind == "gke" ? 1 : 0
+#   name          = docker_image.nginx.name
+#   keep_remotely = true
+# }
 
 
 # Enable GKE API
