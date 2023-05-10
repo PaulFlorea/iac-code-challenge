@@ -7,7 +7,7 @@ on:
   #     - main
 
 jobs:
-  build-and-push:
+  test_and_plan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

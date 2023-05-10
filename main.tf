@@ -25,7 +25,7 @@ resource "docker_image" "nginx" {
 
 resource "docker_registry_image" "nginx" {
   count = var.target.kind == "gke" ? 1 : 0
-  name  = docker_image.nginx.name
+  name      = docker_image.nginx.name
 }
 
 # Namespace
