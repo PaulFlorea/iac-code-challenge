@@ -37,6 +37,9 @@ jobs:
         run:  terraform init;
               terraform workspace select ${{ vars.TF_WORKSPACE }} || terraform workspace new ${{ vars.TF_WORKSPACE }}
 
+      - name: Docker Image Temp Workaround
+        run: docker build ./nginx/ -t ${{ vars.NGINX_IMAGE }}
+
       - name: 'TF Plan'
         run:  echo '${{ vars.TF_VARS }}' > deploy.tfvars;
               terraform plan -var-file deploy.tfvars
